@@ -8,3 +8,35 @@ type Rate struct {
 	TZ    string `dynamo:"TZ" json:"tz"`
 	Price int    `dynamo:"Price" json:"price"`
 }
+
+// GetRatesOutput is the output from the GetAllRatesRoute
+type GetRatesOutput struct {
+	BaseOutput
+	Rates []Rate `json:"rates"`
+}
+
+// CreateRateInput is the input to the CreateRateRoute and contains
+// the fields necessary to create a new rate
+type CreateRateInput struct {
+	Days  string `json:"days"`
+	Times string `json:"times"`
+	TZ    string `json:"tz"`
+	Price int    `json:"price"`
+}
+
+// CreateRateOutput is the output from the CreateRateRoute
+type CreateRateOutput struct {
+	BaseOutput
+	Rate Rate `json:"rate"`
+}
+
+// OverwriteRatesInput is the input to the OverwriteRatesRoute
+type OverwriteRatesInput struct {
+	Rates *[]CreateRateInput `json:"rates"`
+}
+
+// OverwriteRatesOutput is the output from the OverwriteRatesRoute
+type OverwriteRatesOutput struct {
+	BaseOutput
+	Rates []Rate `json:"rates"`
+}

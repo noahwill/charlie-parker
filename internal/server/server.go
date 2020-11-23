@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"charlie-parker/internal/config"
+	"charlie-parker/internal/routes"
 	utils "charlie-parker/utils"
 
 	"github.com/labstack/echo/v4"
@@ -23,6 +24,13 @@ func Start() {
 
 	// Utility
 	e.GET("/heartbeat", utils.HeartbeatRoute)
+
+	// V1 API route group
+	v1 := e.Group("/api/v1")
+	// RATES
+	v1.GET("/rates", routes.GetRatesRoute)
+	v1.POST("/rates/create", routes.CreateRateRoute)
+	v1.POST("/rates/update/all", routes.OverwriteRatesRoute)
 
 	e.Logger.Fatal(e.Start(":" + config.Config.WebServerPort))
 }

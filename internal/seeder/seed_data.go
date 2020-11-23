@@ -2,7 +2,7 @@ package seeder
 
 import "charlie-parker/pkg/types"
 
-var seedData = []types.Rate{
+var seedData = []types.CreateRateInput{
 	{
 		Days:  "mon,tues,thurs",
 		Times: "0900-2100",
