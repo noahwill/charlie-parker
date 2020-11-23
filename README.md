@@ -3,9 +3,12 @@
 
 ## Project Structure
 ```
+docker-compose.local.yml
+Dockerfile
 go.mod
 go.sum
-Dockerfile
+README.md
+tools.sh -- command line tools for running the app
 ├── cmd
 |    ├── seeder
 |    |    └── main.go -- app entry for seeding local dynamo

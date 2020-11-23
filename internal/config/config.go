@@ -20,7 +20,7 @@ type Configuration struct {
 	RatesTableConn dynamo.Table
 	WebServerPort  string `default:"8554"`
 	APIURL         string `default:"http://localhost:8554"`
-	DyDBEndpoint   string `default:"http://localhost:8000"`
+	DyDBEndpoint   string `default:"http://dynamo:8000"`
 }
 
 // Config is the app-wide Configuration

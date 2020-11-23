@@ -1,0 +1,40 @@
+version: "3.3"
+
+services:
+  dynamo:
+    container_name: cp-dynamo
+    image: instructure/dynamo-local-admin
+    ports:
+      - "8000:8000"
+  charlie-parker-seeder:
+    container_name: cp-seeder
+    build:
+      dockerfile: Dockerfile
+      context: .
+      args:
+        - app=seeder
+    depends_on:
+      - dynamo
+    environment:
+      - SETTINGS_APP_NAME=charlie-parker-seeder
+      - SETTINGS_MODE=local
+      - AWS_ACCESS_KEY_ID=key
+      - AWS_SECRET_ACCESS_KEY=user
+      - AWS_REGION=us-east-1
+  charlie-parker-server:
+    container_name: cp-server-local
+    build:
+      dockerfile: Dockerfile
+      context: .
+      args:
+        - app=server
+    ports:
+      - "8554:8554"
+    depends_on:
+      - dynamo
+      - charlie-parker-seeder
+    environment:
+      - SETTINGS_MODE=local
+      - AWS_ACCESS_KEY_ID=key
+      - AWS_SECRET_ACCESS_KEY=user
+      - AWS_REGION=us-east-1
