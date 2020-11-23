@@ -5,6 +5,7 @@
 ```
 go.mod
 go.sum
+Dockerfile
 ├── cmd
 |    ├── seeder
 |    |    └── main.go -- app entry for seeding local dynamo
@@ -14,7 +15,7 @@ go.sum
 |    ├── config
 |    |    └── config.go -- init() for app-wide configuration
 |    ├── helpers
-|    |    ├── rates.go    -- helper funcs for getting/creating/overwriting rates
+|    |    ├── rates.go    -- helper funcs for routes in \routes\rates.go
 |    |    ├── util.go     -- general helper functions for data manipulation
 |    |    └── validate.go -- validation functions for route inputs
 |    ├── routes
