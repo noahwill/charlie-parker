@@ -40,3 +40,15 @@ type OverwriteRatesOutput struct {
 	BaseOutput
 	Rates []Rate `json:"rates"`
 }
+
+// GetTimespanPriceInput is the input to the CalculateTimeSpanCostRoute
+type GetTimespanPriceInput struct {
+	Start *string `json:"start"`
+	End   *string `json:"end"`
+}
+
+// GetTimespanPriceOutput is the output from the CalculateTimeSpanCostRoute
+type GetTimespanPriceOutput struct {
+	BaseOutput
+	Price string `json:"price"`
+}

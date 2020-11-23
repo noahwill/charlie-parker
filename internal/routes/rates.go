@@ -83,3 +83,26 @@ func OverwriteRatesRoute(c echo.Context) error {
 	log.Infof("Successfully overwrote existing rates with %d new rates in %s", len(out.Rates), config.Config.RatesTable)
 	return c.JSON(http.StatusOK, &out)
 }
+
+// GetTimespanPriceRoute is the api handler that gets the price from the rate that corresponds to a given date range
+func GetTimespanPriceRoute(c echo.Context) error {
+	var (
+		err error
+		in  types.GetTimespanPriceInput
+		out types.GetTimespanPriceOutput
+	)
+
+	if err = c.Bind(&in); err != nil {
+		out.Error = fmt.Sprintf("Could not get price with error: %v", err)
+		log.Error(out.Error)
+		return c.JSON(http.StatusBadRequest, &out)
+	}
+
+	if out.Price, err = helpers.GetTimespanPrice(&in); err != nil {
+		out.Error = fmt.Sprintf("Could not get price with error: %v", err)
+		log.Error(out.Error)
+		return c.JSON(http.StatusInternalServerError, &out)
+	}
+
+	return c.JSON(http.StatusOK, &out)
+}

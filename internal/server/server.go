@@ -31,6 +31,8 @@ func Start() {
 	v1.GET("/rates", routes.GetRatesRoute)
 	v1.POST("/rates/create", routes.CreateRateRoute)
 	v1.POST("/rates/update/all", routes.OverwriteRatesRoute)
+	// PARKING PRICE
+	v1.POST("/park", routes.GetTimespanPriceRoute)
 
 	e.Logger.Fatal(e.Start(":" + config.Config.WebServerPort))
 }

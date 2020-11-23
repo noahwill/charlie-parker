@@ -1,10 +1,13 @@
 package helpers
 
 import (
+	"charlie-parker/pkg/types"
 	"errors"
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/labstack/gommon/log"
 )
 
 const (
@@ -129,4 +132,73 @@ func getTimeObjectsFromTimes(times []string) (earlier time.Time, later time.Time
 		return earlier, later, fmt.Errorf("could not parse later time in range %v: %v", times, err)
 	}
 	return earlier, later, err
+}
+
+// matchTimespanToRate tries to find an existing rate that a given timespan would be covered by
+func matchTimespanToRate(startTime, endTime time.Time) (types.Rate, error) {
+	var (
+		err           error
+		rate          types.Rate
+		existingRates []types.Rate
+		matchingRates []types.Rate
+	)
+
+	if existingRates, err = GetRates(); err != nil {
+		return rate, err
+	}
+
+	inputDayStr, _ := weekdayToDay(startTime.Weekday())
+	inputDay := startTime.Day()
+	inputMonth := startTime.Month()
+	inputYear := startTime.Year()
+	_, inputOffset := startTime.Zone()
+
+	for _, rate := range existingRates {
+		if strings.Contains(rate.Days, inputDayStr) {
+			rateLocation, _ := time.LoadLocation(rate.TZ)
+			// create a dummy time object in terms of the input's year, month, and day
+			// set the hour of the time to 3am to widely avoid any potential conflict for days
+			// on which clocks change around the world (the latest of which currently occurs
+			// the first Sunday in April at 4AM in Samoa)
+			dummy := time.Date(inputYear, inputMonth, inputDay, 5, 0, 0, 0, rateLocation)
+			_, rateOffset := dummy.Zone()
+			if inputOffset == rateOffset {
+				rateTimes, _ := timeSpanAsSlice(rate.Times)
+				// these times have the format "0000-01-01 HH:00:00 +0000 UTC"
+				rateStart, rateEnd, _ := getTimeObjectsFromTimes(rateTimes)
+				// put rate start and end in terms of the input's year, month, and day;
+				// due to the month and day of the existing rate times being set to 01,
+				// the month and day passed in are decremented
+				rateStart = rateStart.AddDate(inputYear, int(inputMonth)-1, inputDay-1)
+				rateEnd = rateEnd.AddDate(inputYear, int(inputMonth)-1, inputDay-1)
+				// rate start and end are still in UTC, thus we must put the times in the correct
+				// timezone while retaining the same hour information by subtracting the offset
+				// from their unix timestamp representation
+				rateStart = time.Unix((rateStart.Unix() - int64(inputOffset)), 0).In(rateLocation)
+				rateEnd = time.Unix((rateEnd.Unix() - int64(inputOffset)), 0).In(rateLocation)
+				// rateStart <= startTime < rateEnd
+				if startTime.Sub(rateStart) >= 0 && startTime.Sub(rateEnd) < 0 {
+					// rateStart < endTime <= rateEnd
+					if endTime.Sub(rateStart) > 0 && endTime.Sub(rateEnd) <= 0 {
+						// We found a match!
+						matchingRates = append(matchingRates, rate)
+					}
+					log.Infof("Input end time (%v) is does not fall between rate start and end (%v - %v)", endTime, rateStart, rateEnd)
+				} else {
+					log.Infof("Input start time (%v) is does not fall between rate start and end (%v - %v)", startTime, rateStart, rateEnd)
+				}
+			} else {
+				log.Infof("Input offset (%v) not equal to rate offset (%v)", inputOffset, rateOffset)
+			}
+		} else {
+			log.Infof("Input day (%s) not in rate's days %s", inputDay, rate.Days)
+		}
+	}
+
+	if len(matchingRates) != 1 {
+		log.Errorf("There were multiple rates that matched a user's GetTimespanPriceInput, this may indicate that somehow there are rates that overlap in the DB. (Matched Rates: %v)", matchingRates)
+		return rate, fmt.Errorf("there was not one rate found to match the given start/end (%v - %v)", startTime, endTime)
+	}
+
+	return matchingRates[0], err
 }

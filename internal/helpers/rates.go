@@ -4,6 +4,8 @@ import (
 	"charlie-parker/internal/config"
 	"charlie-parker/pkg/types"
 	"errors"
+	"strconv"
+	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/labstack/gommon/log"
@@ -90,4 +92,31 @@ func OverwriteRates(in *types.OverwriteRatesInput) ([]types.Rate, error) {
 	}
 	err = putRatesInTable(rates...)
 	return rates, err
+}
+
+// GetTimespanPrice finds the price corresponding to the given input
+func GetTimespanPrice(in *types.GetTimespanPriceInput) (string, error) {
+	var (
+		err                error
+		price              string = "unavailable"
+		matchedRate        types.Rate
+		startTime, endTime time.Time
+	)
+
+	if in.Start == nil {
+		return price, errors.New("specify start")
+	} else if in.End == nil {
+		return price, errors.New("specify end")
+	}
+
+	if startTime, endTime, err = validateTimeRange(in.Start, in.End); err != nil {
+		return price, err
+	}
+
+	if matchedRate, err = matchTimespanToRate(startTime, endTime); err != nil {
+		return price, err
+	}
+
+	price = strconv.Itoa(matchedRate.Price)
+	return price, err
 }
