@@ -96,7 +96,7 @@ In order to test the routes defined for the server, build the app and use the fo
 
 ### POST to create a rate
 [This](https://github.com/noahwill/charlie-parker/blob/cd87ad3e2221173035476941f95c314046cb8cdd/internal/server/server.go#L32) [route](https://github.com/noahwill/charlie-parker/blob/cd87ad3e2221173035476941f95c314046cb8cdd/internal/routes/rates.go#L40) creates a rate based on the following required input:
-  - `Days` any substring of `"mon,tues,wed,thurs,fri,sat,sun"`
+  - `Days` any substring of `"sun,mon,tues,wed,thurs,fri,sat"`
   - `Times` a string range of 24-hour time hours and minutes in the format of `"HHMM-HHMM"`
   - `TZ` a string timezone (i.e. `"America/Chicago"`)
   - `Price` an integer (represents number of cents charged per hour)
