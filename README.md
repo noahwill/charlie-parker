@@ -64,7 +64,7 @@ In order for a set of start and end times [to match to an existing rate](https:/
   5. for which end is greater than its start time
   6. for which end is less than or equal to its end time
   
-Beyond this business functionality, average response time, number of hits, number of successful exchanges, and number of failed exchanges are measured for each route defined for the server.
+Beyond this business functionality, average response time, API endpoint hits, number of successful exchanges, and number of failed exchanges are metrics measured for each route defined for the server.
 
 ## Building Docker Containers
 Currently, this app is only set up for a local environment. You will need Docker and Go installed in order to run. (You can either follow the instructions below or alternatively run the file [tools.sh](https://github.com/noahwill/charlie-parker/blob/cd87ad3e2221173035476941f95c314046cb8cdd/tools.sh#L5) with the argument `local` to run a script to build and test this app entirely.)
