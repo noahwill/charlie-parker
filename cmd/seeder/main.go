@@ -8,6 +8,8 @@ import (
 )
 
 func main() {
+	config.ConnectRatesTable()
+	config.ConnectRouteMetricsTable()
 	log.Infof("%s starting", config.Config.AppName)
 	seeder.Run()
 }

@@ -32,12 +32,21 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+// ConnectRatesTable connects to the rates table
+func ConnectRatesTable() {
 	log.Info("Connecting to Rates Table")
 	Config.RatesTableConn = connectDynamoDB(Config.RatesTable, types.Rate{})
+}
+
+// ConnectRouteMetricsTable connects to the route metrics table
+func ConnectRouteMetricsTable() {
 	log.Info("Connecting to Route Metrics Table")
 	Config.RouteMetricsTableConn = connectDynamoDB(Config.RouteMetricsTable, types.RouteMetrics{})
 }
 
+// connectDynamoDB connects to tableName in dynamodb
 func connectDynamoDB(tableName string, tableDataType interface{}) dynamo.Table {
 	// Setup a session to DynamoDB
 	dy := dynamo.New(session.New(), &aws.Config{Endpoint: aws.String(Config.DyDBEndpoint), Region: aws.String(Config.Region)})

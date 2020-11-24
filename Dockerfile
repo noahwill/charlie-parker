@@ -3,7 +3,7 @@ RUN apk update && apk add gcc g++
 RUN mkdir /build
 ADD . /build/
 WORKDIR /build
-RUN go test -mod=vendor ./...
+RUN go test -mod=vendor ./internal/helpers/...
 
 FROM builderbase as builder
 WORKDIR /build

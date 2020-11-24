@@ -93,6 +93,7 @@ func GetTimespanPrice(in *types.GetTimespanPriceInput) (string, error) {
 		err                error
 		price              string = "unavailable"
 		matchedRate        types.Rate
+		existingRates      []types.Rate
 		startTime, endTime time.Time
 	)
 
@@ -106,7 +107,11 @@ func GetTimespanPrice(in *types.GetTimespanPriceInput) (string, error) {
 		return price, err
 	}
 
-	if matchedRate, err = matchTimespanToRate(startTime, endTime); err != nil {
+	if existingRates, err = GetRates(); err != nil {
+		return price, err
+	}
+
+	if matchedRate, err = matchTimespanToRate(startTime, endTime, existingRates); err != nil {
 		return price, err
 	}
 

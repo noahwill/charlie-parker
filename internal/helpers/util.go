@@ -109,14 +109,20 @@ func getTimeRangesFromDaysAndTimes(days, times, tz string, price int) []timeRang
 		var timeRange timeRange
 		earlier, later, _ := getTimeObjectsFromTimes(timeSpanSlice)
 		weekday, _ := dayToWeekday(day)
+		offset := getLocationOffset(2017, time.January, weekday, loc)
 
 		// in order to correctly parse the times into a timezone,
 		// the year needs to be non-zero - here the default is
 		// 2017 since that was a year that started on a sunday
 		// and is nice for adding days to get the correct day
 		// portion of the time object
-		earlier = earlier.AddDate(2017, 0, weekday).In(loc)
-		later = later.AddDate(2017, 0, weekday).In(loc)
+		earlier = earlier.AddDate(2017, 0, weekday)
+		later = later.AddDate(2017, 0, weekday)
+
+		// this shift preserves the hours represented in the times string when
+		// the times are put in therms of loc with .In()
+		earlier = time.Unix((earlier.Unix() - int64(offset)), 0).In(loc)
+		later = time.Unix((later.Unix() - int64(offset)), 0).In(loc)
 
 		timeRange.days = days
 		timeRange.times = times
@@ -151,17 +157,12 @@ func getTimeObjectsFromTimes(times []string) (earlier time.Time, later time.Time
 }
 
 // matchTimespanToRate tries to find an existing rate that a given timespan would be covered by
-func matchTimespanToRate(startTime, endTime time.Time) (types.Rate, error) {
+func matchTimespanToRate(startTime, endTime time.Time, existingRates []types.Rate) (types.Rate, error) {
 	var (
 		err           error
 		rate          types.Rate
-		existingRates []types.Rate
 		matchingRates []types.Rate
 	)
-
-	if existingRates, err = GetRates(); err != nil {
-		return rate, err
-	}
 
 	inputDayStr, _ := weekdayToDay(startTime.Weekday())
 	inputDay := startTime.Day()
@@ -172,12 +173,7 @@ func matchTimespanToRate(startTime, endTime time.Time) (types.Rate, error) {
 	for _, rate := range existingRates {
 		if strings.Contains(rate.Days, inputDayStr) {
 			rateLocation, _ := time.LoadLocation(rate.TZ)
-			// create a dummy time object in terms of the input's year, month, and day
-			// set the hour of the time to 3am to widely avoid any potential conflict for days
-			// on which clocks change around the world (the latest of which currently occurs
-			// the first Sunday in April at 4AM in Samoa)
-			dummy := time.Date(inputYear, inputMonth, inputDay, 5, 0, 0, 0, rateLocation)
-			_, rateOffset := dummy.Zone()
+			rateOffset := getLocationOffset(inputYear, inputMonth, inputDay, rateLocation)
 			if inputOffset == rateOffset {
 				rateTimes, _ := timeSpanAsSlice(rate.Times)
 				// these times have the format "0000-01-01 HH:00:00 +0000 UTC"
@@ -207,16 +203,31 @@ func matchTimespanToRate(startTime, endTime time.Time) (types.Rate, error) {
 				log.Infof("Input offset (%v) not equal to rate offset (%v)", inputOffset, rateOffset)
 			}
 		} else {
-			log.Infof("Input day (%s) not in rate's days %s", inputDay, rate.Days)
+			log.Infof("Input day (%d) not in rate's days %d", inputDay, rate.Days)
 		}
 	}
 
-	if len(matchingRates) != 1 {
+	if len(matchingRates) > 1 {
 		log.Errorf("There were multiple rates that matched a user's GetTimespanPriceInput, this may indicate that somehow there are rates that overlap in the DB. (Matched Rates: %v)", matchingRates)
 		return rate, fmt.Errorf("there was not one rate found to match the given start/end (%v - %v)", startTime, endTime)
 	}
 
+	if len(matchingRates) == 0 {
+		return rate, errors.New("unavailable")
+	}
+
 	return matchingRates[0], err
+}
+
+// getLocationOffset create a dummy time object in terms of the input's year, month, and day
+// set the hour of the time to 5am to widely avoid any potential conflict for days
+// on which clocks change around the world (the latest of which currently occurs
+// the first Sunday in April at 4AM in Samoa) and then returns the offset of that
+// dummy time
+func getLocationOffset(year int, month time.Month, day int, loc *time.Location) int {
+	dummy := time.Date(year, month, day, 5, 0, 0, 0, loc)
+	_, offset := dummy.Zone()
+	return offset
 }
 
 //-----------------------------------------------------------------------------
