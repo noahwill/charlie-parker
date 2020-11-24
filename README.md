@@ -123,6 +123,6 @@ _(These will return a price only if you've used the create or overwrite examples
 > Windows: `curl -X POST -H "Content-Type: application/json" -d "{\"Start\": \"2017-01-06T17:00:00-06:00\", \"End\": \"2017-01-06T18:00:00-06:00\"}" http://localhost:8554/api/v1/park`
 
 ## GET route metrics
-[This](https://github.com/noahwill/charlie-parker/blob/cd87ad3e2221173035476941f95c314046cb8cdd/internal/server/server.go#L39) [route](https://github.com/noahwill/charlie-parker/blob/cd87ad3e2221173035476941f95c314046cb8cdd/internal/routes/routemetrics.go#L17) gets the route metrics for all of the routes defined by this app.
+[This](https://github.com/noahwill/charlie-parker/blob/cd87ad3e2221173035476941f95c314046cb8cdd/internal/server/server.go#L39) [route](https://github.com/noahwill/charlie-parker/blob/cd87ad3e2221173035476941f95c314046cb8cdd/internal/routes/routemetrics.go#L17) gets the route metrics for all of the routes defined by this app. _If hit right after a fresh build of the app, this route will return no metrics. Hit a few other routes, or this one a couple more times, then call this one to see the metrics come in!_
 
 > Mac/Linux/Windows: `curl -X GET http://localhost:8554/api/health/routes`
