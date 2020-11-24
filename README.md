@@ -81,7 +81,7 @@ In your command prompt navigate to where you have cloned this repo:
 
 > Run the server: `docker run -e AWS_ACCESS_KEY_ID=key -e AWS_SECRET_ACCESS_KEY=secret -e AWS_REGION=us-east-1 -p 8554:8554 --name cp-server charlie-parker-server:latest`
 
-_(The environment variables related to AWS are needed to connect to the local dynamo tables)_ 
+_(The environment variables related to AWS are needed to [connect to the local dynamo tables](https://hub.docker.com/r/instructure/dynamo-local-admin))_ 
 
 ## Business Logic Testing
 Tests are defined for two files: internal\helpers\\[utils.go](https://github.com/noahwill/charlie-parker/blob/master/internal/helpers/util.go) and internal\helpers\\[validate.go](https://github.com/noahwill/charlie-parker/blob/master/internal/helpers/validate.go) in [utils_test.go](https://github.com/noahwill/charlie-parker/blob/master/internal/helpers/util_test.go) and [validate_test.go](https://github.com/noahwill/charlie-parker/blob/master/internal/helpers/validate_test.go) respectively. These two files contain most of the business logic and do not need a DB connection nor an HTTP request to test. These are the tests run [when Docker is building](https://github.com/noahwill/charlie-parker/blob/cd87ad3e2221173035476941f95c314046cb8cdd/Dockerfile#L6) the app; they may also be run individually.
