@@ -8,13 +8,12 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/labstack/gommon/log"
 )
 
 // GetRates gets all of the rates from the DB
 func GetRates() ([]types.Rate, error) {
 	var rates []types.Rate
-	err := config.Config.RatesTableConn.Scan().Filter("$ = ?", "Active", true).All(&rates)
+	err := config.Config.RatesTableConn.Scan().All(&rates)
 	return rates, err
 }
 
@@ -31,7 +30,6 @@ func CreateRate(in *types.CreateRateInput, checkOverlap bool, createImmediately 
 	}
 
 	uu, _ := uuid.NewV4()
-	log.Infof("UUID: %s", uu.String())
 	rate = types.Rate{
 		Days:  in.Days,
 		Times: in.Times,
@@ -49,16 +47,6 @@ func CreateRate(in *types.CreateRateInput, checkOverlap bool, createImmediately 
 	return rate, err
 }
 
-// putRatesInTable puts one or more rates in the RatesTable
-func putRatesInTable(rates ...types.Rate) error {
-	for _, rate := range rates {
-		if err := config.Config.RatesTableConn.Put(&rate).Run(); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // OverwriteRates deletes all existing rates and replaces them with new ones from input
 func OverwriteRates(in *types.OverwriteRatesInput) ([]types.Rate, error) {
 	var (
@@ -73,10 +61,15 @@ func OverwriteRates(in *types.OverwriteRatesInput) ([]types.Rate, error) {
 	}
 
 	for _, input := range *in.Rates {
-		var rate types.Rate
-		if rate, err = CreateRate(&input, true, false); err != nil {
+		if err = validateAgainstExistingRates(rates, input); err != nil {
 			return rates, err
 		}
+
+		var rate types.Rate
+		if rate, err = CreateRate(&input, false, false); err != nil {
+			return rates, err
+		}
+
 		rates = append(rates, rate)
 	}
 

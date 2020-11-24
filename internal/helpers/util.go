@@ -1,14 +1,20 @@
 package helpers
 
 import (
+	"charlie-parker/internal/config"
 	"charlie-parker/pkg/types"
 	"errors"
 	"fmt"
 	"strings"
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/labstack/gommon/log"
 )
+
+//-----------------------------------------------------------------------------
+// RATES UTIL -----------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 const (
 	sun   = "sun"
@@ -69,6 +75,16 @@ func weekdayToDay(weekday time.Weekday) (string, error) {
 		return sat, nil
 	}
 	return "n/a", fmt.Errorf("cannot convert %v to type Day", weekday)
+}
+
+// putRatesInTable puts one or more rates in the RatesTable
+func putRatesInTable(rates ...types.Rate) error {
+	for _, rate := range rates {
+		if err := config.Config.RatesTableConn.Put(&rate).Run(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // timeRanges are constructed using days/times/timezones from CreateRateInput objects
@@ -201,4 +217,82 @@ func matchTimespanToRate(startTime, endTime time.Time) (types.Rate, error) {
 	}
 
 	return matchingRates[0], err
+}
+
+//-----------------------------------------------------------------------------
+// ROUTE METRICS UTIL ---------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+const (
+	// GetRatesRouteName const
+	GetRatesRouteName = "GetRatesRoute"
+	// CreateRateRouteName const
+	CreateRateRouteName = "CreateRateRoute"
+	// OverwriteRatesRouteName const
+	OverwriteRatesRouteName = "OverwriteRatesRoute"
+	// GetTimespanPriceRouteName const
+	GetTimespanPriceRouteName = "GetTimespanPriceRoute"
+	// GetAllRouteMetricsRouteName const
+	GetAllRouteMetricsRouteName = "GetAllRouteMetricsRoute"
+)
+
+// isValidRouteName errors if a given route name is not defined
+func isValidRouteName(routeName string) error {
+	switch routeName {
+	case GetRatesRouteName, CreateRateRouteName, OverwriteRatesRouteName, GetTimespanPriceRouteName, GetAllRouteMetricsRouteName:
+		return nil
+	}
+	return fmt.Errorf("Invalid route name: %s", routeName)
+}
+
+// getRouteMetrics tries to find a route metrics object that matches a given routeName
+func getRouteMetrics(routeName string) (types.RouteMetrics, bool, error) {
+	var (
+		err             error
+		exists          bool
+		metrics         types.RouteMetrics
+		existingMetrics []types.RouteMetrics
+	)
+
+	if err = isValidRouteName(routeName); err != nil {
+		return metrics, exists, err
+	}
+
+	if existingMetrics, err = GetAllRouteMetrics(); err != nil {
+		return metrics, exists, err
+	}
+
+	for _, metrics = range existingMetrics {
+		if exists = metrics.RouteName == routeName; exists {
+			break
+		}
+	}
+
+	return metrics, exists, err
+}
+
+// createRouteMetrics creates a new route metrics for a given route
+func createRouteMetrics(routeName string) types.RouteMetrics {
+	uu, _ := uuid.NewV4()
+	metrics := types.RouteMetrics{
+		RouteName:   routeName,
+		LastUpdated: time.Now().Unix(),
+		CreatedAt:   time.Now().Unix(),
+		UUID:        uu.String(),
+	}
+	return metrics
+}
+
+func calculateAvgResponseTime(responseTime time.Duration, avgResponseTime string, hits int64) string {
+	if hits > 1 {
+		parsedAvg, _ := time.ParseDuration(avgResponseTime)
+		avg := parsedAvg.Milliseconds()
+		avg += (responseTime.Milliseconds() - avg) / hits
+		avgStr := fmt.Sprintf("%dms", avg)
+		log.Infof(">1: %s", avgStr)
+		return avgStr
+	}
+	avgStr := fmt.Sprintf("%dms", responseTime.Milliseconds())
+	log.Infof("<1: %s", avgStr)
+	return avgStr
 }

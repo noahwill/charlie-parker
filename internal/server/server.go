@@ -34,5 +34,9 @@ func Start() {
 	// PARKING PRICE
 	v1.POST("/park", routes.GetTimespanPriceRoute)
 
+	// API health routes
+	health := e.Group("/api/health")
+	health.GET("/routes", routes.GetAllRouteMetricsRoute)
+
 	e.Logger.Fatal(e.Start(":" + config.Config.WebServerPort))
 }
