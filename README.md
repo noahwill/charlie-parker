@@ -44,7 +44,7 @@ charlie-parker
 ```
 
 ## Functionality
-This app allows for the storage and retrieval of [parking rates](https://github.com/noahwill/charlie-parker/blob/cd87ad3e2221173035476941f95c314046cb8cdd/pkg/types/rates.go#L4) that have a comma separated list of days for which they cover, a time span in the format HHMM-HHMM, a time zone, and a price. Rates must not define a time range that is already covered by a rate. For example, a rate that covers 9am-2pm on Fridays in the timezone America/Chicago may not be created if a rate that covers 12pm-1pm on Fridays in the timezone America/Chicago already exists.
+This app allows for the storage and retrieval of [parking rates](https://github.com/noahwill/charlie-parker/blob/cd87ad3e2221173035476941f95c314046cb8cdd/pkg/types/rates.go#L4) that have a comma separated list of days for which they cover, a time span in the format "HHMM-HHMM", a time zone, and a price. Rates must not define a time range that is already covered by a rate. For example, a rate that covers 9am-2pm on Fridays in the timezone America/Chicago may not be created if a rate that covers 12pm-1pm on Fridays in the timezone America/Chicago already exists.
 
 A set of [start and end times](https://github.com/noahwill/charlie-parker/blob/cd87ad3e2221173035476941f95c314046cb8cdd/pkg/types/rates.go#L45) strings may be sent to the app's server, if there is a rate that covers that time range, its price will be returned to the client. [Start and end must](https://github.com/noahwill/charlie-parker/blob/cd87ad3e2221173035476941f95c314046cb8cdd/internal/helpers/validate.go#L162):
 
