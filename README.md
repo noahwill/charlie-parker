@@ -8,6 +8,7 @@ charlie-parker
  ├── Dockerfile
  ├── go.mod
  ├── go.sum
+ ├── main.go -- blank main file to allow for testing
  ├── README.md
  ├── tools.sh -- command line tools for running the app
  ├── cmd
@@ -19,10 +20,12 @@ charlie-parker
  |    ├── config
  |    |    └── config.go -- init() for app-wide configuration
  |    ├── helpers
- |    |    ├── rates.go        -- helper funcs for routes in \routes\rates.go
- |    |    ├── routemetrics.go -- helper funcs for route metrics and routes in \routes\routemetrics.go
- |    |    ├── util.go         -- general helper functions for data manipulation
- |    |    └── validate.go     -- validation functions for route inputs
+ |    |    ├── rates.go         -- helper funcs for routes in \routes\rates.go
+ |    |    ├── routemetrics.go  -- helper funcs for route metrics and routes in \routes\routemetrics.go
+ |    |    ├── util_test.go     -- tests for util.go
+ |    |    ├── util.go          -- general helper functions for data manipulation
+ |    |    ├── validate_test.go -- tests for validate.go
+ |    |    └── validate.go      -- validation functions for route inputs
  |    ├── routes
  |    |    ├── rates.go        -- rate-related route handlers
  |    |    └── routemetrics.go -- metrics-related route handlers
