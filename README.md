@@ -1,5 +1,5 @@
 # charlie-parker 🎷🚗
-*Making parking smoother than the jazz king, [Yardbird](https://en.wikipedia.org/wiki/Charlie_Parker), himself!*
+*Making parking smoother than the jazz king, [Yardbird](https://en.wikipedia.org/wiki/Charlie_Parker), himself!* This app gave me an opportunity to flex and sharpen my Go/REST api/AWS Dynamo DB/Docker skills!
 
 ## Project Structure
 ```
